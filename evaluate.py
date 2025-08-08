@@ -5,6 +5,16 @@ import os
 import torch
 import torch.distributed as dist
 
+
+def get_device():
+    """Get the best available device: MPS on Apple Silicon, CUDA on NVIDIA, else CPU."""
+    if torch.backends.mps.is_available() and torch.backends.mps.is_built():
+        return "mps"
+    elif torch.cuda.is_available():
+        return "cuda"
+    else:
+        return "cpu"
+
 import pydantic
 from omegaconf import OmegaConf
 from pretrain import PretrainConfig, init_train_state, evaluate, create_dataloader
@@ -29,7 +39,10 @@ def launch():
         RANK = dist.get_rank()
         WORLD_SIZE = dist.get_world_size()
 
-        torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
+        device = get_device()
+        if device == "cuda":
+            torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
+        # MPS doesn't support device selection per process like CUDA
 
     with open(os.path.join(os.path.dirname(eval_cfg.checkpoint), "all_config.yaml"), "r") as f:
         config = PretrainConfig(**yaml.safe_load(f))
@@ -45,9 +58,9 @@ def launch():
     train_state = init_train_state(config, train_metadata, world_size=WORLD_SIZE)
     # Try unwrap torch.compile
     try:
-        train_state.model.load_state_dict(torch.load(eval_cfg.checkpoint, map_location="cuda"), assign=True)
+        train_state.model.load_state_dict(torch.load(eval_cfg.checkpoint, map_location=get_device()), assign=True)
     except:
-        train_state.model.load_state_dict({k.removeprefix("_orig_mod."): v for k, v in torch.load(eval_cfg.checkpoint, map_location="cuda").items()}, assign=True)
+        train_state.model.load_state_dict({k.removeprefix("_orig_mod."): v for k, v in torch.load(eval_cfg.checkpoint, map_location=get_device()).items()}, assign=True)
     
     train_state.step = 0
     ckpt_filename = os.path.basename(eval_cfg.checkpoint)

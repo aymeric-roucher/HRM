@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "torch",
-    "adam-atan2",
     "einops",
     "tqdm",
     "coolname",
@@ -16,4 +15,5 @@ dependencies = [
     "omegaconf",
     "hydra-core",
     "huggingface_hub",
+    "numpy>=2.3.2",
 ]

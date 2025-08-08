@@ -68,10 +68,10 @@ Train a master-level Sudoku AI capable of solving extremely difficult puzzles on
 
 ```bash
 # Download and build Sudoku dataset
-python dataset/build_sudoku_dataset.py --output-dir data/sudoku-extreme-1k-aug-1000  --subsample-size 1000 --num-aug 1000
+uv run python dataset/build_sudoku_dataset.py --output-dir data/sudoku-extreme-1k-aug-1000  --subsample-size 1000 --num-aug 1000
 
 # Start training (single GPU, smaller batch size)
-OMP_NUM_THREADS=8 python pretrain.py data_path=data/sudoku-extreme-1k-aug-1000 epochs=20000 eval_interval=2000 global_batch_size=384 lr=7e-5 puzzle_emb_lr=7e-5 weight_decay=1.0 puzzle_emb_weight_decay=1.0
+DISABLE_COMPILE=1 OMP_NUM_THREADS=8 uv run python pretrain.py data_path=data/sudoku-extreme-1k-aug-1000 epochs=20000 eval_interval=2000 global_batch_size=256 lr=7e-5 puzzle_emb_lr=7e-5 weight_decay=1.0 puzzle_emb_weight_decay=1.0
 ```
 
 Runtime: ~10 hours on a RTX 4070 laptop GPU
