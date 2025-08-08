@@ -1,0 +1,19 @@
+[project]
+name = "hrm"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "torch",
+    "adam-atan2",
+    "einops",
+    "tqdm",
+    "coolname",
+    "pydantic",
+    "argdantic",
+    "wandb",
+    "omegaconf",
+    "hydra-core",
+    "huggingface_hub",
+]
